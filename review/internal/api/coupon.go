@@ -1,7 +1,7 @@
 package api
 
 import (
-	. "coupon_service/review/internal/api/entity"
+	. "coupon_service/internal/api/entity"
 	"net/http"
 
 	"github.com/gin-gonic/gin"

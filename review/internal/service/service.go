@@ -1,7 +1,7 @@
 package service
 
 import (
-	. "coupon_service/review/internal/service/entity"
+	. "coupon_service/internal/service/entity"
 	"fmt"
 
 	"github.com/google/uuid"

@@ -1,6 +1,6 @@
 package entity
 
-import "coupon_service/review/internal/service/entity"
+import "coupon_service/internal/service/entity"
 
 type ApplicationRequest struct {
 	Code   string

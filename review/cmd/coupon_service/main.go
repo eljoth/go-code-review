@@ -1,10 +1,10 @@
 package main
 
 import (
-	"coupon_service/review/internal/api"
-	"coupon_service/review/internal/config"
-	"coupon_service/review/internal/repository/memdb"
-	"coupon_service/review/internal/service"
+	"coupon_service/internal/api"
+	"coupon_service/internal/config"
+	"coupon_service/internal/repository/memdb"
+	"coupon_service/internal/service"
 	"fmt"
 	"time"
 )
