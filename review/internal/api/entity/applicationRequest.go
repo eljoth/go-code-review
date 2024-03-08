@@ -1,8 +1,8 @@
 package entity
 
-import "coupon_service/internal/service/entity"
+import svcentity "coupon_service/internal/service/entity"
 
 type ApplicationRequest struct {
-	Code   string
-	Basket entity.Basket
+	Code   string           `binding:"required"`
+	Basket svcentity.Basket `binding:"required"`
 }

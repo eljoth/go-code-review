@@ -8,11 +8,16 @@ import (
 )
 
 type Config struct {
-	API api.Config
+	Api api.Config
 }
 
 func New() Config {
-	cfg := Config{}
+	cfg := Config{
+		Api: api.Config{
+			Host: "127.0.0.1",
+			Port: 8080,
+		},
+	}
 	if err := alligotor.Get(&cfg); err != nil {
 		log.Fatal(err)
 	}

@@ -7,39 +7,39 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func (a *API) Apply(c *gin.Context) {
+func (a API) Apply(c *gin.Context) {
 	apiReq := ApplicationRequest{}
-	if err := c.ShouldBindJSON(&apiReq); err != nil {
+	if err := c.BindJSON(&apiReq); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	basket, err := a.svc.ApplyCoupon(apiReq.Basket, apiReq.Code)
+	err := a.svc.ApplyCoupon(&apiReq.Basket, apiReq.Code)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, apiReq.Basket)
 		return
 	}
-
-	c.JSON(http.StatusOK, basket)
+	c.JSON(http.StatusOK, apiReq.Basket)
 }
 
-func (a *API) Create(c *gin.Context) {
+func (a API) Create(c *gin.Context) {
 	apiReq := Coupon{}
-	if err := c.ShouldBindJSON(&apiReq); err != nil {
+	if err := c.BindJSON(&apiReq); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
 	err := a.svc.CreateCoupon(apiReq.Discount, apiReq.Code, apiReq.MinBasketValue)
 	if err != nil {
+		_ = c.AbortWithError(http.StatusConflict, err)
 		return
 	}
-	c.Status(http.StatusOK)
 }
 
-func (a *API) Get(c *gin.Context) {
+func (a API) Get(c *gin.Context) {
 	apiReq := CouponRequest{}
-	if err := c.ShouldBindJSON(&apiReq); err != nil {
+	if err := c.BindJSON(&apiReq); err != nil {
+		_ = c.AbortWithError(http.StatusBadRequest, err)
 		return
 	}
-	coupons, err := a.svc.GetCoupons(apiReq.Codes)
-	if err != nil {
-		return
-	}
+	coupons, _ := a.svc.GetCoupons(apiReq.Codes)
 	c.JSON(http.StatusOK, coupons)
 }

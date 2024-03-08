@@ -7,3 +7,6 @@ Code smells and security issues are made on purpose. All the code to be reviewed
 in the [review](review) directory.
 
 
+# Notes
+- Discuss usage of ID in Coupon
+- Discuss why API is/was generic

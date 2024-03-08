@@ -1,11 +1,7 @@
 package entity
 
-import (
-	_ "github.com/gin-gonic/gin"
-)
-
 type Basket struct {
-	Value                 int
-	AppliedDiscount       int
-	ApplicationSuccessful bool
+	Value                 int  `binding:"required"`
+	AppliedDiscount       int  `binding:"-"`
+	ApplicationSuccessful bool `binding:"-"`
 }

@@ -12,8 +12,8 @@ import (
 )
 
 type Service interface {
-	ApplyCoupon(entity.Basket, string) (*entity.Basket, error)
-	CreateCoupon(int, string, int) any
+	ApplyCoupon(*entity.Basket, string) error
+	CreateCoupon(int, string, int) error
 	GetCoupons([]string) ([]entity.Coupon, error)
 }
 
@@ -24,40 +24,32 @@ type Config struct {
 
 type API struct {
 	srv *http.Server
-	MUX *gin.Engine
+	mux *gin.Engine
 	svc Service
-	CFG Config
+	cfg Config
 }
 
-func New[T Service](cfg Config, svc T) API {
-	gin.SetMode(gin.ReleaseMode)
-	r := new(gin.Engine)
-	r = gin.New()
+func New(cfg Config, svc Service) API {
+	r := gin.New()
 	r.Use(gin.Recovery())
 
 	return API{
-		MUX: r,
-		CFG: cfg,
+		mux: r,
+		cfg: cfg,
 		svc: svc,
-	}.withServer()
+	}.withServer().withRoutes()
 }
 
 func (a API) withServer() API {
-
-	ch := make(chan API)
-	go func() {
-		a.srv = &http.Server{
-			Addr:    fmt.Sprintf(":%d", a.CFG.Port),
-			Handler: a.MUX,
-		}
-		ch <- a
-	}()
-
-	return <-ch
+	a.srv = &http.Server{
+		Addr:    fmt.Sprintf("%s:%d", a.cfg.Host, a.cfg.Port),
+		Handler: a.mux,
+	}
+	return a
 }
 
 func (a API) withRoutes() API {
-	apiGroup := a.MUX.Group("/api")
+	apiGroup := a.mux.Group("/api")
 	apiGroup.POST("/apply", a.Apply)
 	apiGroup.POST("/create", a.Create)
 	apiGroup.GET("/coupons", a.Get)
@@ -71,10 +63,8 @@ func (a API) Start() {
 }
 
 func (a API) Close() {
-	<-time.After(5 * time.Second)
 	ctx, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
-
 	if err := a.srv.Shutdown(ctx); err != nil {
 		log.Println(err)
 	}

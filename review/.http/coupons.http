@@ -1,0 +1,30 @@
+POST http://localhost:8080/api/create
+Content-Type: application/json
+
+{
+  "discount": 100,
+  "code": "Superdiscount",
+  "minBasketValue": 200
+}
+###
+
+GET http://localhost:8080/api/coupons
+Accept: application/json
+Content-Type: application/json
+
+{
+  "codes": ["Superdiscount"]
+}
+###
+
+POST http://localhost:8080/api/apply
+Content-Type: application/json
+
+{
+  "code": "Superdiscount",
+  "basket": {
+    "value": 250
+  }
+}
+
+###
