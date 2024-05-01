@@ -54,6 +54,15 @@ func (a *API) Get(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	for _, code := range apiReq.Codes {
+		_, err := a.svc.FindByCode(code)
+		if err != nil {
+			c.JSON(http.StatusNotFound, gin.H{"error": "Coupon with code " + code + " not found"})
+			return
+		}
+	}
+
 	coupons, err := a.svc.GetCoupons(apiReq.Codes)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
