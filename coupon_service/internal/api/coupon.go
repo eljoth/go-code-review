@@ -3,6 +3,7 @@ package api
 import (
 	//changed dot import https://go.dev/wiki/CodeReviewComments#import-dot and added entity. prefix
 	"coupon_service/internal/api/entity"
+	"fmt"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -15,6 +16,18 @@ func (a *API) Apply(c *gin.Context) {
 		c.JSON(http.StatusBadRequest, gin.H{"error": err.Error()})
 		return
 	}
+
+	coupon, err := a.svc.FindByCode(apiReq.Code)
+	if err != nil {
+		c.JSON(http.StatusNotFound, gin.H{"error": "Coupon with code " + apiReq.Code + " not found"})
+		return
+	}
+
+	if apiReq.Basket.Value < coupon.MinBasketValue {
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Basket value (%d) inferior to the minimum basket value for this code (%d)", apiReq.Basket.Value, coupon.MinBasketValue)})
+		return
+	}
+
 	basket, err := a.svc.ApplyCoupon(apiReq.Basket, apiReq.Code)
 	if err != nil {
 		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
@@ -35,7 +48,7 @@ func (a *API) Create(c *gin.Context) {
 	// Check if a coupon with the same code already exists
 	_, err := a.svc.FindByCode(apiReq.Code)
 	if err == nil {
-		c.JSON(http.StatusConflict, gin.H{"error": "A coupon with this code already exists"})
+		c.JSON(http.StatusBadRequest, gin.H{"error": fmt.Sprintf("Coupon with code %s already exists", apiReq.Code)})
 		return
 	}
 
