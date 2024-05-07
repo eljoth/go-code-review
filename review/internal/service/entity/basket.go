@@ -1,7 +1,7 @@
 package entity
 
 type Basket struct {
-	Value                 int
+	Value                 float64
 	AppliedDiscount       int
 	ApplicationSuccessful bool
 }

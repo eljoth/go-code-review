@@ -29,12 +29,12 @@ func (s Service) ApplyCoupon(basket Basket, code string) (b *Basket, e error) {
 		return nil, err
 	}
 
-	if b.ApplicationSuccessful {
-		return nil, fmt.Errorf("discount has been already applied")
+	if coupon.MinBasketValue > int(b.Value) {
+		return nil, fmt.Errorf("basket value does not reach minimum value")
 	}
 
 	if b.Value > 0 {
-		b.Value = b.Value * (coupon.Discount / 100)
+		b.Value = b.Value * (1 - float64(coupon.Discount)/100)
 		b.AppliedDiscount = coupon.Discount
 		b.ApplicationSuccessful = true
 		return b, nil

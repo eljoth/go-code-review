@@ -41,12 +41,17 @@ func TestService_ApplyCoupon(t *testing.T) {
 		args    args
 		wantB   *entity.Basket
 		wantErr bool
-	}{}
+	}{
+		{"Apply 10%", fields{memdb.New()}, args{entity.Basket{Value: 16}, "DiscountCode"}, &entity.Basket{Value: 14.4, AppliedDiscount: 10, ApplicationSuccessful: true}, false},
+		{"Apply 10%", fields{memdb.New()}, args{entity.Basket{Value: 14}, "DiscountCode"}, nil, true},
+		{"Apply 10%", fields{memdb.New()}, args{entity.Basket{Value: 0}, "DiscountCode"}, nil, true},
+	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			s := Service{
 				repo: tt.fields.repo,
 			}
+			s.CreateCoupon(10, tt.args.code, 15)
 			gotB, err := s.ApplyCoupon(tt.args.basket, tt.args.code)
 			if (err != nil) != tt.wantErr {
 				t.Errorf("ApplyCoupon() error = %v, wantErr %v", err, tt.wantErr)
