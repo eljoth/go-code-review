@@ -15,6 +15,7 @@ func (a *API) Apply(c *gin.Context) {
 	}
 	basket, err := a.svc.ApplyCoupon(apiReq.Basket, apiReq.Code)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 
@@ -28,6 +29,7 @@ func (a *API) Create(c *gin.Context) {
 	}
 	err := a.svc.CreateCoupon(apiReq.Discount, apiReq.Code, apiReq.MinBasketValue)
 	if err != nil {
+		c.JSON(http.StatusBadRequest, err)
 		return
 	}
 	c.Status(http.StatusOK)
@@ -41,7 +43,8 @@ func (a *API) Get(c *gin.Context) {
 	coupons, err := a.svc.GetCoupons(apiReq.Codes)
 	if err != nil {
 		log.Printf("Error when getting coupons: %v", err)
-		c.JSON(http.StatusOK, coupons)
+		// We can change this to status code
+		c.JSON(http.StatusBadRequest, coupons)
 		return
 	}
 	c.JSON(http.StatusOK, coupons)

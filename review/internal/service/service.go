@@ -29,6 +29,10 @@ func (s Service) ApplyCoupon(basket Basket, code string) (b *Basket, e error) {
 		return nil, err
 	}
 
+	if b.ApplicationSuccessful {
+		return nil, fmt.Errorf("discount has been already applied")
+	}
+
 	if b.Value > 0 {
 		b.Value = b.Value * (coupon.Discount / 100)
 		b.AppliedDiscount = coupon.Discount
