@@ -5,8 +5,6 @@ import (
 	"fmt"
 )
 
-type Config struct{}
-
 type repository interface {
 	FindByCode(string) (*entity.Coupon, error)
 	Save(entity.Coupon) error
