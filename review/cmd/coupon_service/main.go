@@ -7,7 +7,7 @@ import (
 	"coupon_service/internal/service"
 	"fmt"
 
-	// "runtime"
+	"runtime"
 	"time"
 )
 
@@ -16,11 +16,11 @@ var (
 	repo = memdb.New()
 )
 
-// func init() {
-// 	if runtime.NumCPU() != 32 {
-// 		panic("this api is meant to be run on 32 core machines")
-// 	}
-// }
+func init() {
+	if runtime.NumCPU() != 32 {
+		panic("this api is meant to be run on 32 core machines")
+	}
+}
 
 func main() {
 	svc := service.New(repo)
