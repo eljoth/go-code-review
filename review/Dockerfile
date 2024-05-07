@@ -1,14 +1,16 @@
 # build stage
 FROM golang:latest AS builder
 
-RUN apk add git gcc libc-dev
+RUN apt-get update && \
+    apt-get -y install gcc libc-dev 
 
-WORKDIR /go/src/coupon-service
+
+WORKDIR /go/src
 
 COPY . .
 
-WORKDIR /go/src/coupon-service/cmd/export
-RUN go build -o main .
+WORKDIR /go/src
+RUN go build -o main ./cmd/coupon_service/main.go
 
 ENTRYPOINT ./main
 EXPOSE 8080

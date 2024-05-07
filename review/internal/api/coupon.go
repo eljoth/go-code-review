@@ -2,6 +2,7 @@ package api
 
 import (
 	. "coupon_service/internal/api/entity"
+	"log"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -39,6 +40,8 @@ func (a *API) Get(c *gin.Context) {
 	}
 	coupons, err := a.svc.GetCoupons(apiReq.Codes)
 	if err != nil {
+		log.Printf("Error when getting coupons: %v", err)
+		c.JSON(http.StatusOK, coupons)
 		return
 	}
 	c.JSON(http.StatusOK, coupons)

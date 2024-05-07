@@ -30,14 +30,13 @@ func (s Service) ApplyCoupon(basket Basket, code string) (b *Basket, e error) {
 	}
 
 	if b.Value > 0 {
+		b.Value = b.Value * (coupon.Discount / 100)
 		b.AppliedDiscount = coupon.Discount
 		b.ApplicationSuccessful = true
-	}
-	if b.Value == 0 {
-		return
+		return b, nil
 	}
 
-	return nil, fmt.Errorf("Tried to apply discount to negative value")
+	return nil, fmt.Errorf("discount value cannot be zero")
 }
 
 func (s Service) CreateCoupon(discount int, code string, minBasketValue int) any {
@@ -66,6 +65,7 @@ func (s Service) GetCoupons(codes []string) ([]Coupon, error) {
 			} else {
 				e = fmt.Errorf("%w; code: %s, index: %d", e, code, idx)
 			}
+			continue
 		}
 		coupons = append(coupons, *coupon)
 	}

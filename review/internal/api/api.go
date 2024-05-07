@@ -47,7 +47,7 @@ func (a API) withServer() API {
 	ch := make(chan API)
 	go func() {
 		a.srv = &http.Server{
-			Addr:    fmt.Sprintf(":%d", a.CFG.Port),
+			Addr:    fmt.Sprintf("%s:%d", a.CFG.Host, a.CFG.Port),
 			Handler: a.MUX,
 		}
 		ch <- a
@@ -58,16 +58,19 @@ func (a API) withServer() API {
 
 func (a API) withRoutes() API {
 	apiGroup := a.MUX.Group("/api")
-	apiGroup.POST("/apply", a.Apply)
-	apiGroup.POST("/create", a.Create)
-	apiGroup.GET("/coupons", a.Get)
+	couponApiGroup := apiGroup.Group("/coupon")
+	couponApiGroup.POST("/apply", a.Apply)
+	couponApiGroup.POST("/create", a.Create)
+	couponApiGroup.GET("/list", a.Get)
 	return a
 }
 
 func (a API) Start() {
-	if err := a.srv.ListenAndServe(); err != nil {
-		log.Fatal(err)
-	}
+	// Since we are using gin gonic, it makes sense to use the Run function
+	// for the gin engine.
+	// Also we init the routes.
+	a.withRoutes()
+	a.MUX.Run(a.srv.Addr)
 }
 
 func (a API) Close() {
