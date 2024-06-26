@@ -6,8 +6,6 @@ import (
 	"sync"
 )
 
-var ()
-
 type Repository struct {
 	entries map[string]entity.Coupon
 	lock    sync.RWMutex
@@ -33,6 +31,11 @@ func (r *Repository) FindByCode(code string) (*entity.Coupon, error) {
 func (r *Repository) Save(coupon entity.Coupon) error {
 	r.lock.Lock()
 	defer r.lock.Unlock()
+
+	_, ok := r.entries[coupon.Code]
+	if ok {
+		return repository.ErrAlreadyExists
+	}
 
 	r.entries[coupon.Code] = coupon
 	return nil

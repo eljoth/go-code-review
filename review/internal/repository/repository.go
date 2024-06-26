@@ -11,4 +11,7 @@ type Repository interface {
 	Save(entity.Coupon) error
 }
 
-var ErrNotFound = errors.New("coupon not found")
+var (
+	ErrNotFound      = errors.New("coupon not found")
+	ErrAlreadyExists = errors.New("coupon already exists")
+)
