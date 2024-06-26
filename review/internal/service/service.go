@@ -19,25 +19,33 @@ func New(repo repository.Repository) Service {
 	}
 }
 
-func (s Service) ApplyCoupon(basket entity.Basket, code string) (b *entity.Basket, e error) {
-	b = &basket
+func (s Service) ApplyCoupon(basket entity.Basket, code string) (*entity.Basket, error) {
+	if basket.Value < 0 {
+		return nil, errors.New("tried to apply discount to negative value")
+	}
+
 	coupon, err := s.repo.FindByCode(code)
 	if err != nil {
-		return nil, err
+		if errors.Is(err, repository.ErrNotFound) {
+			return nil, fmt.Errorf("error with coupon code %s: %w", code, err)
+		}
+		return nil, fmt.Errorf("failed to get coupon with code %s: %w", code, err)
 	}
 
-	if b.Value > 0 {
-		b.AppliedDiscount = coupon.Discount
-		b.ApplicationSuccessful = true
-	}
-	if b.Value == 0 {
-		return
+	if basket.Value > 0 {
+		if basket.Value < coupon.MinBasketValue {
+			basket.ApplicationSuccessful = false
+			return &basket, nil
+		}
+
+		basket.AppliedDiscount = coupon.Discount
+		basket.ApplicationSuccessful = true
 	}
 
-	return nil, errors.New("tried to apply discount to negative value")
+	return &basket, nil
 }
 
-func (s Service) CreateCoupon(discount int, code string, minBasketValue int) any {
+func (s Service) CreateCoupon(discount int, code string, minBasketValue int) (*entity.Coupon, error) {
 	coupon := entity.Coupon{
 		Discount:       discount,
 		Code:           code,
@@ -46,26 +54,24 @@ func (s Service) CreateCoupon(discount int, code string, minBasketValue int) any
 	}
 
 	if err := s.repo.Save(coupon); err != nil {
-		return err
+		return nil, fmt.Errorf("failed to save coupon: %w", err)
 	}
-	return nil
+	return &coupon, nil
 }
 
 func (s Service) GetCoupons(codes []string) ([]entity.Coupon, error) {
 	coupons := make([]entity.Coupon, 0, len(codes))
-	var e error = nil
 
-	for idx, code := range codes {
+	for _, code := range codes {
 		coupon, err := s.repo.FindByCode(code)
 		if err != nil {
-			if e == nil {
-				e = fmt.Errorf("code: %s, index: %d", code, idx)
-			} else {
-				e = fmt.Errorf("%w; code: %s, index: %d", e, code, idx)
+			if errors.Is(err, repository.ErrNotFound) {
+				return nil, fmt.Errorf("error with coupon code %s: %w", code, err)
 			}
+			return nil, fmt.Errorf("failed to get coupon with code %s: %w", code, err)
 		}
 		coupons = append(coupons, *coupon)
 	}
 
-	return coupons, e
+	return coupons, nil
 }
