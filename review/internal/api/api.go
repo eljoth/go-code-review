@@ -29,7 +29,7 @@ type API struct {
 	cfg Config
 }
 
-func New[T Service](cfg Config, svc T) *API {
+func New(cfg Config, svc Service) *API {
 	gin.SetMode(gin.ReleaseMode)
 
 	r := gin.New()
