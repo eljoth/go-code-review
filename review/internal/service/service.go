@@ -32,8 +32,15 @@ func (s Service) ApplyCoupon(basket entity.Basket, code string) (*entity.Basket,
 		return nil, fmt.Errorf("failed to get coupon with code %s: %w", code, err)
 	}
 
+	if basket.Value == 0 {
+		basket.ApplicationSuccessful = true
+		basket.AppliedDiscount = 0
+		return &basket, nil
+	}
+
 	if basket.Value > 0 {
 		if basket.Value < coupon.MinBasketValue {
+			basket.AppliedDiscount = 0
 			basket.ApplicationSuccessful = false
 			return &basket, nil
 		}

@@ -4,6 +4,7 @@ import (
 	"coupon_service/internal/repository"
 	"coupon_service/internal/service/entity"
 	"errors"
+	"log/slog"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
@@ -53,6 +54,7 @@ func basketFromEntity(e entity.Basket) Basket {
 func (a *API) Apply(c *gin.Context) {
 	var apiReq ApplicationRequest
 	if err := c.ShouldBindJSON(&apiReq); err != nil {
+		c.JSON(http.StatusBadRequest, gin.H{"error": "failed to parse request"})
 		return
 	}
 	if err := apiReq.validate(); err != nil {
@@ -66,7 +68,8 @@ func (a *API) Apply(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		slog.Error("failed to apply coupon", slog.Any("err", err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown error"})
 		return
 	}
 
@@ -80,8 +83,8 @@ type Coupon struct {
 }
 
 func (c Coupon) validate() error {
-	if c.Discount < 1 {
-		return errors.New("discount must be greater than 0")
+	if c.Discount < 1 || c.Discount > 100 {
+		return errors.New("discount must be between 1 and 100")
 	}
 	if c.MinBasketValue < 0 {
 		return errors.New("min_basket_value must be greater than or equal to 0")
@@ -113,6 +116,12 @@ func (a *API) Create(c *gin.Context) {
 
 	coupon, err := a.svc.CreateCoupon(apiReq.Discount, apiReq.Code, apiReq.MinBasketValue)
 	if err != nil {
+		if errors.Is(err, repository.ErrAlreadyExists) {
+			c.JSON(http.StatusConflict, gin.H{"error": err.Error()})
+			return
+		}
+		slog.Error("failed to create coupon", slog.Any("err", err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown error"})
 		return
 	}
 	c.JSON(http.StatusCreated, couponFromEntity(*coupon))
@@ -131,7 +140,8 @@ func (a *API) Get(c *gin.Context) {
 			c.JSON(http.StatusNotFound, gin.H{"error": err.Error()})
 			return
 		}
-		c.JSON(http.StatusInternalServerError, gin.H{"error": err.Error()})
+		slog.Error("failed to get coupons", slog.Any("err", err))
+		c.JSON(http.StatusInternalServerError, gin.H{"error": "unknown error"})
 		return
 	}
 	c.JSON(http.StatusOK, coupons)
