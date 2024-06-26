@@ -1,28 +1,25 @@
 package service
 
 import (
-	. "coupon_service/internal/service/entity"
+	"coupon_service/internal/repository"
+	"coupon_service/internal/service/entity"
 	"fmt"
 
 	"github.com/google/uuid"
+	"github.com/pkg/errors"
 )
 
-type Repository interface {
-	FindByCode(string) (*Coupon, error)
-	Save(Coupon) error
-}
-
 type Service struct {
-	repo Repository
+	repo repository.Repository
 }
 
-func New(repo Repository) Service {
+func New(repo repository.Repository) Service {
 	return Service{
 		repo: repo,
 	}
 }
 
-func (s Service) ApplyCoupon(basket Basket, code string) (b *Basket, e error) {
+func (s Service) ApplyCoupon(basket entity.Basket, code string) (b *entity.Basket, e error) {
 	b = &basket
 	coupon, err := s.repo.FindByCode(code)
 	if err != nil {
@@ -37,11 +34,11 @@ func (s Service) ApplyCoupon(basket Basket, code string) (b *Basket, e error) {
 		return
 	}
 
-	return nil, fmt.Errorf("Tried to apply discount to negative value")
+	return nil, errors.New("tried to apply discount to negative value")
 }
 
 func (s Service) CreateCoupon(discount int, code string, minBasketValue int) any {
-	coupon := Coupon{
+	coupon := entity.Coupon{
 		Discount:       discount,
 		Code:           code,
 		MinBasketValue: minBasketValue,
@@ -54,8 +51,8 @@ func (s Service) CreateCoupon(discount int, code string, minBasketValue int) any
 	return nil
 }
 
-func (s Service) GetCoupons(codes []string) ([]Coupon, error) {
-	coupons := make([]Coupon, 0, len(codes))
+func (s Service) GetCoupons(codes []string) ([]entity.Coupon, error) {
+	coupons := make([]entity.Coupon, 0, len(codes))
 	var e error = nil
 
 	for idx, code := range codes {

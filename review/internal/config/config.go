@@ -2,19 +2,34 @@ package config
 
 import (
 	"coupon_service/internal/api"
-	"log"
+	"fmt"
+
+	"log/slog"
 
 	"github.com/brumhard/alligotor"
 )
 
 type Config struct {
-	API api.Config
+	Runtime Runtime
+	API     api.Config
 }
 
-func New() Config {
-	cfg := Config{}
-	if err := alligotor.Get(&cfg); err != nil {
-		log.Fatal(err)
+type Runtime struct {
+	LogLevel string
+}
+
+func New() (*Config, error) {
+	cfg := Config{
+		Runtime: Runtime{
+			LogLevel: slog.LevelDebug.String(),
+		},
+		API: api.Config{
+			Host: "localhost",
+			Port: 8080,
+		},
 	}
-	return cfg
+	if err := alligotor.Get(&cfg); err != nil {
+		return nil, fmt.Errorf("failed to get config: %w", err)
+	}
+	return &cfg, nil
 }

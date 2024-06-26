@@ -1,11 +1,16 @@
 package api
 
 import (
-	. "coupon_service/internal/api/entity"
+	"coupon_service/internal/service/entity"
 	"net/http"
 
 	"github.com/gin-gonic/gin"
 )
+
+type ApplicationRequest struct {
+	Code   string
+	Basket entity.Basket
+}
 
 func (a *API) Apply(c *gin.Context) {
 	apiReq := ApplicationRequest{}
@@ -20,6 +25,12 @@ func (a *API) Apply(c *gin.Context) {
 	c.JSON(http.StatusOK, basket)
 }
 
+type Coupon struct {
+	Discount       int
+	Code           string
+	MinBasketValue int
+}
+
 func (a *API) Create(c *gin.Context) {
 	apiReq := Coupon{}
 	if err := c.ShouldBindJSON(&apiReq); err != nil {
@@ -30,6 +41,10 @@ func (a *API) Create(c *gin.Context) {
 		return
 	}
 	c.Status(http.StatusOK)
+}
+
+type CouponRequest struct {
+	Codes []string
 }
 
 func (a *API) Get(c *gin.Context) {

@@ -1,6 +1,7 @@
 package service
 
 import (
+	"coupon_service/internal/repository"
 	"coupon_service/internal/repository/memdb"
 	"coupon_service/internal/service/entity"
 	"reflect"
@@ -9,7 +10,7 @@ import (
 
 func TestNew(t *testing.T) {
 	type args struct {
-		repo Repository
+		repo repository.Repository
 	}
 	tests := []struct {
 		name string
@@ -29,7 +30,7 @@ func TestNew(t *testing.T) {
 
 func TestService_ApplyCoupon(t *testing.T) {
 	type fields struct {
-		repo Repository
+		repo repository.Repository
 	}
 	type args struct {
 		basket entity.Basket
@@ -61,7 +62,7 @@ func TestService_ApplyCoupon(t *testing.T) {
 
 func TestService_CreateCoupon(t *testing.T) {
 	type fields struct {
-		repo Repository
+		repo repository.Repository
 	}
 	type args struct {
 		discount       int
